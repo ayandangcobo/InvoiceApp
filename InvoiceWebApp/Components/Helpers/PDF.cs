@@ -15,8 +15,9 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace InvoiceWebApp.Components.Helpers {
-	public class PDF
+namespace InvoiceWebApp.Components.Helpers
+{
+    public class PDF
     {
         private Invoice invoice = null;
         private Debtor debtor = null;
@@ -70,6 +71,11 @@ namespace InvoiceWebApp.Components.Helpers {
             BaseFont helveticaBold = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
 
             // Company logo
+            if (settings.ShowLogoInPDF)
+            {
+                settings.ShowLogoInPDF = settings.Logo?.Length >= 5 ? true : false;
+            }
+
             if (settings.ShowLogoInPDF)
             {
                 // Convert base64 string to byte[]
@@ -182,14 +188,14 @@ namespace InvoiceWebApp.Components.Helpers {
                 cb.ShowTextAligned(Element.ALIGN_LEFT, item.Description, 185, y, 0);
 
                 //  Price
-                cb.ShowTextAligned(Element.ALIGN_LEFT, "€" + item.Price.ToString("N2"), 350, y, 0);
+                cb.ShowTextAligned(Element.ALIGN_LEFT, "R" + item.Price.ToString("N2"), 350, y, 0);
 
                 //  Quantity
                 cb.ShowTextAligned(Element.ALIGN_LEFT, item.Quantity.ToString(), 425, y, 0);
 
                 // Total
                 var total = item.Price * item.Quantity;
-                cb.ShowTextAligned(Element.ALIGN_LEFT, "€" + total.ToString("N2"), 470, y, 0);
+                cb.ShowTextAligned(Element.ALIGN_LEFT, "R" + total.ToString("N2"), 470, y, 0);
 
                 // VAT
                 cb.ShowTextAligned(Element.ALIGN_RIGHT, item.Tax + "%", 560, y, 0);
@@ -219,11 +225,11 @@ namespace InvoiceWebApp.Components.Helpers {
             // Subtotal
             cb.SetFontAndSize(helvetica, 10f);
             cb.ShowTextAligned(Element.ALIGN_RIGHT, "Subtotal", 390, y, 0);
-            cb.ShowTextAligned(Element.ALIGN_RIGHT, "€ " + subtotal.ToString("N2"), 509, y, 0);
+            cb.ShowTextAligned(Element.ALIGN_RIGHT, "R " + subtotal.ToString("N2"), 509, y, 0);
 
             // Total VAT
             cb.ShowTextAligned(Element.ALIGN_RIGHT, "Amount VAT", 390, y - 15, 0);
-            cb.ShowTextAligned(Element.ALIGN_RIGHT, "€ " + taxTotal.ToString("N2"), 509, y - 15, 0);
+            cb.ShowTextAligned(Element.ALIGN_RIGHT, "R " + taxTotal.ToString("N2"), 509, y - 15, 0);
 
             // Divider
             cb.SetRgbColorStroke(170, 170, 170);
@@ -233,18 +239,18 @@ namespace InvoiceWebApp.Components.Helpers {
             // Discount
             cb.SetFontAndSize(helveticaBold, 10f);
             cb.ShowTextAligned(Element.ALIGN_RIGHT, "Discount", 390, y - 34, 0);
-            cb.ShowTextAligned(Element.ALIGN_RIGHT, "€ " + invoice.Discount.ToString("N2"), 509, y - 34, 0);
+            cb.ShowTextAligned(Element.ALIGN_RIGHT, "R " + invoice.Discount.ToString("N2"), 509, y - 34, 0);
 
             // Total
             cb.SetFontAndSize(helveticaBold, 10f);
             cb.ShowTextAligned(Element.ALIGN_RIGHT, "Total", 390, y - 49, 0);
-            cb.ShowTextAligned(Element.ALIGN_RIGHT, "€ " + invoice.Total.ToString("N2"), 509, y - 49, 0);
+            cb.ShowTextAligned(Element.ALIGN_RIGHT, "R " + invoice.Total.ToString("N2"), 509, y - 49, 0);
 
             cb.EndText();
 
             // Disclaimer
             var disclaimerText = "We kindly request you to pay the amount of";
-            var disclaimerTotal = String.Format("€{0:N2}", invoice.Total.ToString("N2"));
+            var disclaimerTotal = String.Format("R{0:N2}", invoice.Total.ToString("N2"));
             var disclaimerText2 = "described above before";
             var disclaimerDate = invoice.ExpiredOn.ToString("dd-MM-yyyy");
 
@@ -289,6 +295,12 @@ namespace InvoiceWebApp.Components.Helpers {
 
         private Document InitDocument()
         {
+            if (string.IsNullOrEmpty(debtor.FirstName))
+                debtor.FirstName = "-";
+
+            if (string.IsNullOrEmpty(debtor.LastName))
+                debtor.LastName = debtor.CompanyName;
+
             Document doc = new Document(PageSize.A4, 30, 30, 42, 42);
             doc.AddSubject(String.Format("This invoice belongs to {0}. {1}", debtor.FirstName[0], debtor.LastName));
             doc.AddKeywords("Invoice, Payment");

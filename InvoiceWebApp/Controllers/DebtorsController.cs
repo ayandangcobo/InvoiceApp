@@ -231,11 +231,9 @@ namespace InvoiceWebApp.Controllers
         public async Task<IActionResult> Create([FromBody] DebtorViewModel model)
         {
             if (model == null)
-            {
                 return StatusCode(400, "Invalid parameter(s).");
-            }
 
-            Debtor debtor = new Debtor
+            var debtor = new Debtor
             {
                 Id = model.Id,
                 FirstName = model.FirstName,
@@ -249,9 +247,7 @@ namespace InvoiceWebApp.Controllers
             //Insert debtor
             var data = await _repo.Insert(debtor);
             if (data == null)
-            {
                 return StatusCode(500, "A problem occured while saving the record. Please try again!");
-            }
 
             var result = new DebtorViewModel();
             result.SetProperties(data, true, true);

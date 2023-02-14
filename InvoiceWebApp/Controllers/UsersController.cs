@@ -16,19 +16,20 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace InvoiceWebApp.Controllers {
-	[EnableCors("AllowAll")]
+namespace InvoiceWebApp.Controllers
+{
+    [EnableCors("AllowAll")]
     [Produces("application/json")]
     [Route("api/users")]
     public class UsersController : Controller
     {
-		private readonly IUserRepository _repo;
-		private Email _email;
+        private readonly IUserRepository _repo;
+        private Email _email;
 
         public UsersController(IUserRepository repo, Email email)
         {
-			this._repo = repo;
-			this._email = email;
+            this._repo = repo;
+            this._email = email;
         }
 
         /// <summary>
@@ -190,7 +191,7 @@ namespace InvoiceWebApp.Controllers {
         [ProducesResponseType(typeof(UserViewModel), 200)]
         [ProducesResponseType(typeof(void), 400)]
         [ProducesResponseType(typeof(void), 500)]
-        public async Task<IActionResult> Create([FromBody]UserViewModel model)
+        public async Task<IActionResult> Create([FromBody] UserViewModel model)
         {
             if (model == null)
             {
@@ -223,8 +224,15 @@ namespace InvoiceWebApp.Controllers {
             //If password is empty, then add
             if (String.IsNullOrEmpty(user.Password))
             {
-                user.Password = String.Format("{0}{1}{2}", user.LastName, user.FirstName[0], DateTime.Now.Minute);
-            }
+                if (string.IsNullOrEmpty(user.FirstName))
+                    user.FirstName = user.CompanyName;
+
+                if (string.IsNullOrEmpty(user.LastName))
+                    user.LastName = "";
+
+                user.Password = "Temp123";
+                //user.Password = String.Format("{0}{1}{2}", user.LastName, user.FirstName[0], DateTime.Now.Minute);
+            } 
             var tempPassword = user.Password;
 
             //Insert user
@@ -241,7 +249,7 @@ namespace InvoiceWebApp.Controllers {
             var credentialsUser = user;
             credentialsUser.Password = tempPassword;
 
-            await _email.SendCredentials(credentialsUser);
+            // await _email.SendCredentials(credentialsUser);
 
             return Ok(result);
         }
@@ -254,7 +262,7 @@ namespace InvoiceWebApp.Controllers {
         [ProducesResponseType(typeof(UserViewModel), 200)]
         [ProducesResponseType(typeof(void), 400)]
         [ProducesResponseType(typeof(void), 500)]
-        public async Task<IActionResult> Update([FromBody]UserViewModel model)
+        public async Task<IActionResult> Update([FromBody] UserViewModel model)
         {
             if (model == null)
             {

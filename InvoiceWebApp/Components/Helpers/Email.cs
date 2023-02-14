@@ -7,8 +7,9 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
-namespace InvoiceWebApp.Components.Helpers {
-	public class Email
+namespace InvoiceWebApp.Components.Helpers
+{
+    public class Email
     {
         private string Host;
         private int Port;
@@ -68,6 +69,12 @@ namespace InvoiceWebApp.Components.Helpers {
                 EnableSsl = this.EnableSSL,
                 Credentials = this.Credentials
             };
+
+            if (string.IsNullOrEmpty(debtor.FirstName))
+            {
+                debtor.FirstName = "-";
+                debtor.LastName = debtor.CompanyName;
+            }
 
             using (var message = new MailMessage(this.EmailAddress, debtor.Email)
             {
